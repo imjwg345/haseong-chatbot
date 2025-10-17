@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>하성고 챗봇</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .response {
+      margin-top: 20px;
+    }
+    .qa {
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .qa strong {
+      color: #34495e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>하성고 챗봇</h1>
+    <input type="text" id="question" placeholder="궁금한 점을 입력하세요" />
+    <button onclick="askQuestion()">질문하기</button>
+    <div class="response" id="answerList"></div>
+  </div>
+
+  <script>
+    function askQuestion() {
+      const question = document.getElementById("question").value;
+      fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: question })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("question").value = "";
+        loadAnswers();
+      });
+    }
+
+    function loadAnswers() {
+      fetch("/get_answers")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("answerList");
+          container.innerHTML = "";
+          data.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "qa";
+            div.innerHTML = `<strong>Q:</strong> ${item.question}<br>
+                             <strong>A:</strong> ${item.answer ? item.answer : "(답변 준비 중)"}`;
+            container.appendChild(div);
+          });
+        });
+    }
+
+    window.onload = loadAnswers;
+  </script>
+</body>
+</html>
+
+
